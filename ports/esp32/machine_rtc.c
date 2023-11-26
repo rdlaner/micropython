@@ -174,6 +174,44 @@ static mp_obj_t machine_rtc_memory(size_t n_args, const mp_obj_t *args) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_memory_obj, 1, 2, machine_rtc_memory);
 #endif
 
+#if MICROPY_HW_RTC_USER_MEM_MAX > 0
+static mp_obj_t machine_rtc_unary_op(mp_unary_op_t op, mp_obj_t self_in) {
+    size_t len = sizeof(rtc_user_mem_data);
+
+    switch (op) {
+        case MP_UNARY_OP_BOOL:
+            return mp_obj_new_bool(len != 0);
+        case MP_UNARY_OP_LEN:
+            return MP_OBJ_NEW_SMALL_INT(len);
+        default:
+            return MP_OBJ_NULL;      // op not supported
+    }
+}
+
+static mp_obj_t machine_rtc_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t value) {
+    machine_rtc_memory_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    size_t index_val = mp_get_index(self->base.type, MICROPY_HW_RTC_USER_MEM_MAX, index, false);
+
+    if (value == MP_OBJ_NULL) {
+        return MP_OBJ_NULL; // op not supported
+    } else if (value == MP_OBJ_SENTINEL) {
+        // load
+        return MP_OBJ_NEW_SMALL_INT(rtc_user_mem_data[index_val]);
+    } else {
+        // store
+        mp_int_t byte_value = mp_obj_get_int(value);
+        if (byte_value < 0 || byte_value > 255) {
+            mp_raise_ValueError(MP_ERROR_TEXT("value outside of byte range"));
+        }
+
+        uint8_t short_value = byte_value;
+        rtc_user_mem_data[index_val] = short_value;
+
+        return mp_const_none;
+    }
+}
+#endif
+
 static const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_rtc_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_datetime), MP_ROM_PTR(&machine_rtc_datetime_obj) },
@@ -188,5 +226,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     MP_QSTR_RTC,
     MP_TYPE_FLAG_NONE,
     make_new, machine_rtc_make_new,
-    locals_dict, &machine_rtc_locals_dict
+    locals_dict, &machine_rtc_locals_dict,
+    subscr, machine_rtc_subscr,
+    unary_op, machine_rtc_unary_op
     );
