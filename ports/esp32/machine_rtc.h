@@ -31,6 +31,10 @@
 #include "modmachine.h"
 
 typedef struct {
+    mp_obj_base_t base;
+} machine_rtc_memory_obj_t;
+
+typedef struct {
     #if SOC_PM_SUPPORT_EXT1_WAKEUP
     uint64_t ext1_pins; // set bit == pin#
     #endif
