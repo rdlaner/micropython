@@ -113,3 +113,6 @@ size-files:
 # set correctly if not all submodules are loaded yet.
 submodules:
 	$(Q)idf.py $(IDFPY_FLAGS) -B $(BUILD)/submodules -D UPDATE_SUBMODULES=1 reconfigure
+
+gdb:
+	idf.py $(IDFPY_FLAGS) -p $(PORT) -b $(BAUD) gdb
