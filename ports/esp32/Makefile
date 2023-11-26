@@ -104,3 +104,9 @@ submodules:
 	@GIT_SUBMODULES=$$(idf.py $(IDFPY_FLAGS) -B $(BUILD)/submodules -D ECHO_SUBMODULES=1 build 2>&1 | \
 	                  grep '^GIT_SUBMODULES=' | cut -d= -f2); \
 	$(MAKE) -f ../../py/mkrules.mk GIT_SUBMODULES="$${GIT_SUBMODULES}" submodules
+
+monitor:
+	 idf.py $(IDFPY_FLAGS) -p $(PORT) -b $(BAUD) monitor
+
+gdb:
+	idf.py $(IDFPY_FLAGS) -p $(PORT) -b $(BAUD) gdb
