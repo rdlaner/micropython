@@ -186,12 +186,16 @@ def main():
                 )
             )
             ts_outfile = result.timestamp
-        elif result.kind == manifestfile.KIND_FREEZE_AS_MPY:
+        elif result.kind in (manifestfile.KIND_FREEZE_AS_MPY, manifestfile.KIND_FREEZE_AS_NATIVE):
             outfile = "{}/frozen_mpy/{}.mpy".format(args.build_dir, result.target_path[:-3])
             ts_outfile = get_timestamp(outfile, 0)
             if result.timestamp >= ts_outfile:
                 print("MPY", result.target_path)
                 mkdir(outfile)
+                extra_args = args.mpy_cross_flags.split()
+                if result.kind == manifestfile.KIND_FREEZE_AS_NATIVE:
+                    extra_args += ["-X", "emit=native"]
+
                 # Add __version__ to the end of the file before compiling.
                 with manifestfile.tagged_py_file(result.full_path, result.metadata) as tagged_path:
                     try:
@@ -201,7 +205,7 @@ def main():
                             src_path=result.target_path,
                             opt=result.opt,
                             mpy_cross=MPY_CROSS,
-                            extra_args=args.mpy_cross_flags.split(),
+                            extra_args=extra_args,
                         )
                     except mpy_cross.CrossCompileError as ex:
                         print("error compiling {}:".format(result.target_path))
