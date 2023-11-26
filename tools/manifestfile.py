@@ -52,10 +52,12 @@ KIND_FREEZE_AUTO = 2
 KIND_FREEZE_AS_STR = 3
 # Freeze-mode only, The .py file will be compiled and frozen as bytecode.
 KIND_FREEZE_AS_MPY = 4
+# Freeze-mode only, the .py file will be compiled and frozen as native code.
+KIND_FREEZE_AS_NATIVE = 5
 # Freeze-mode only, The .mpy file will be frozen directly.
-KIND_FREEZE_MPY = 5
+KIND_FREEZE_MPY = 6
 # Compile mode only, the .py file should be compiled to .mpy.
-KIND_COMPILE_AS_MPY = 6
+KIND_COMPILE_AS_MPY = 7
 
 # File on the local filesystem.
 FILE_TYPE_LOCAL = 1
@@ -224,6 +226,7 @@ class ManifestFile:
                     "freeze_as_str": self.freeze_as_str,
                     "freeze_as_mpy": self.freeze_as_mpy,
                     "freeze_mpy": self.freeze_mpy,
+                    "freeze_as_native": self.freeze_as_native,
                 }
             )
 
@@ -371,14 +374,24 @@ class ManifestFile:
                 self._metadata.append(ManifestPackageMetadata(is_require=True))
             try:
                 with open(manifest_path) as f:
-                    # Make paths relative to this manifest file while processing it.
-                    # Applies to includes and input files.
-                    prev_cwd = os.getcwd()
-                    os.chdir(os.path.dirname(manifest_path))
-                    try:
-                        exec(f.read(), self._manifest_globals(kwargs))
-                    finally:
-                        os.chdir(prev_cwd)
+                    manifest_file_lines = f.readlines()
+
+                if kwargs.get("native", False):
+                    # Update this manifest file's use of module and package to include the native argument.
+                    for i, line in enumerate(manifest_file_lines):
+                        if "module" in line or "package" in line:
+                            preamble = line.split(")")[0]
+                            new_line = preamble + ", native=True)"
+                            manifest_file_lines[i] = new_line
+
+                # Make paths relative to this manifest file while processing it.
+                # Applies to includes and input files.
+                prev_cwd = os.getcwd()
+                os.chdir(os.path.dirname(manifest_path))
+                try:
+                    exec("".join(manifest_file_lines), self._manifest_globals(kwargs))
+                finally:
+                    os.chdir(prev_cwd)
             except ManifestIgnoreException:
                 # e.g. MODE_PYPROJECT and this was a stdlib dependency. No-op.
                 pass
@@ -460,7 +473,7 @@ class ManifestFile:
         """
         self._libraries[library] = self._resolve_path(library_path)
 
-    def package(self, package_path, files=None, base_path=".", opt=None):
+    def package(self, package_path, files=None, base_path=".", opt=None, native=False):
         """
         Define a package, optionally restricting to a set of files.
 
@@ -475,11 +488,12 @@ class ManifestFile:
             package("foo", files=["bar/baz.py"])
         """
         self._metadata[-1].check_initialised(self._mode)
+        kind = KIND_AUTO if not native else KIND_FREEZE_AS_NATIVE
 
         # Include "base_path/package_path/**/*.py" --> "package_path/**/*.py"
-        self._search(base_path, package_path, files, exts=(".py",), kind=KIND_AUTO, opt=opt)
+        self._search(base_path, package_path, files, exts=(".py",), kind=kind, opt=opt)
 
-    def module(self, module_path, base_path=".", opt=None):
+    def module(self, module_path, base_path=".", opt=None, native=False):
         """
         Include a single Python file as a module.
 
@@ -490,6 +504,7 @@ class ManifestFile:
             module("foo.py", "src/drivers")
         """
         self._metadata[-1].check_initialised(self._mode)
+        kind = KIND_AUTO if not native else KIND_FREEZE_AS_NATIVE
 
         # Include "base_path/module_path" --> "module_path"
         base_path = self._resolve_path(base_path)
@@ -497,7 +512,7 @@ class ManifestFile:
         if ext.lower() != ".py":
             raise ManifestFileError("module must be .py file")
         # TODO: version None
-        self._add_file(os.path.join(base_path, module_path), module_path, opt=opt)
+        self._add_file(os.path.join(base_path, module_path), module_path, kind=kind, opt=opt)
 
     def _freeze_internal(self, path, script, exts, kind, opt):
         if script is None:
@@ -568,6 +583,9 @@ class ManifestFile:
         frozen directly.
         """
         self._freeze_internal(path, script, exts=(".mpy",), kind=KIND_FREEZE_MPY, opt=opt)
+
+    def freeze_as_native(self, path, script=None, opt=None):
+        self._freeze_internal(path, script, exts=(".py",), kind=KIND_FREEZE_AS_NATIVE, opt=opt)
 
 
 # Generate a temporary file with a line appended to the end that adds __version__.
