@@ -135,12 +135,19 @@ soft_reset:
     machine_i2s_init0();
     #endif
 
-    // run boot-up scripts
-    pyexec_frozen_module("_boot.py", false);
-    int ret = pyexec_file_if_exists("boot.py");
+    // Run port boot-up scripts
+    int ret = pyexec_frozen_module("_boot.py", false);
+    if (ret == pyexec_system_exit) {
+        // Handle any soft resets from boot-up scripts
+        goto soft_reset_exit;
+    }
+
+    // run user boot-up scripts
+    ret = pyexec_file_if_exists("boot.py");
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset_exit;
     }
+
     if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL && ret != 0) {
         int ret = pyexec_file_if_exists("main.py");
         if (ret & PYEXEC_FORCED_EXIT) {

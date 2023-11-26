@@ -1,3 +1,4 @@
+# import _pre_boot
 import gc
 import os
 from flashbdev import bdev
