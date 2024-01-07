@@ -172,9 +172,7 @@ static mp_obj_t machine_rtc_memory(size_t n_args, const mp_obj_t *args) {
     }
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_memory_obj, 1, 2, machine_rtc_memory);
-#endif
 
-#if MICROPY_HW_RTC_USER_MEM_MAX > 0
 static mp_obj_t machine_rtc_unary_op(mp_unary_op_t op, mp_obj_t self_in) {
     size_t len = sizeof(rtc_user_mem_data);
 
@@ -216,6 +214,7 @@ static const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_rtc_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_datetime), MP_ROM_PTR(&machine_rtc_datetime_obj) },
     #if MICROPY_HW_RTC_USER_MEM_MAX > 0
+    { MP_ROM_QSTR(MP_QSTR_MEM_SIZE), MP_ROM_INT(MICROPY_HW_RTC_USER_MEM_MAX) },
     { MP_ROM_QSTR(MP_QSTR_memory), MP_ROM_PTR(&machine_rtc_memory_obj) },
     #endif
 };
