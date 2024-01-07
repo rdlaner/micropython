@@ -11,3 +11,5 @@
 #define MICROPY_HW_SPI1_MOSI                (35)
 #define MICROPY_HW_SPI1_MISO                (37)
 #define MICROPY_HW_SPI1_SCK                 (36)
+
+#define MICROPY_HW_RTC_USER_MEM_MAX         (3840)
