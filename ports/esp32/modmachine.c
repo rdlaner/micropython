@@ -165,6 +165,13 @@ STATIC void machine_sleep_helper(wake_type_t wake_type, size_t n_args, const mp_
     }
 
     if (machine_rtc_config.wake_on_ulp) {
+        if (machine_rtc_config.wake_gpio) {
+            // RTC peripheral power domain needs to be kept on to detect the GPIO state change
+            if (esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON) != ESP_OK) {
+                mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("esp_sleep_pd_config() failed"));
+            }
+        }
+
         if (esp_sleep_enable_ulp_wakeup() != ESP_OK) {
             mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("esp_sleep_enable_ulp_wakeup() failed"));
         }

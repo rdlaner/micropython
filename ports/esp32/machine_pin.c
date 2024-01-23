@@ -135,13 +135,14 @@ STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
 
 // pin.init(mode=None, pull=-1, *, value, drive, hold)
 STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_hold };
+    enum { ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_hold, ARG_wakeup };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_mode, MP_ARG_OBJ, {.u_obj = mp_const_none}},
         { MP_QSTR_pull, MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(-1)}},
         { MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
         { MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
         { MP_QSTR_hold, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
+        { MP_QSTR_wakeup, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
     };
 
     // parse args
@@ -217,6 +218,14 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
         // (re-)enable pad hold if requested
         if (mp_obj_is_true(args[ARG_hold].u_obj)) {
             gpio_hold_en(index);
+        }
+    }
+
+    // configure wakeup
+    if (args[ARG_wakeup].u_obj != MP_OBJ_NULL) {
+        if (mp_obj_is_true(args[ARG_wakeup].u_obj)) {
+            machine_rtc_config.wake_gpio = true;
+            gpio_wakeup_enable(index, GPIO_INTR_LOW_LEVEL);
         }
     }
 

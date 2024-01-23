@@ -152,6 +152,12 @@ STATIC mp_obj_t machine_rtc_init(mp_obj_t self_in, mp_obj_t date) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_rtc_init_obj, machine_rtc_init);
 
 #if MICROPY_HW_RTC_USER_MEM_MAX > 0
+
+STATIC mp_obj_t machine_rtc_mem_start(mp_obj_t self_in) {
+    return mp_obj_new_int_from_uint((uintptr_t)&rtc_user_mem_data[0]);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_rtc_mem_start_obj, machine_rtc_mem_start);
+
 STATIC mp_obj_t machine_rtc_memory(size_t n_args, const mp_obj_t *args) {
     if (n_args == 1) {
         // read RTC memory
@@ -216,6 +222,7 @@ STATIC const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
     #if MICROPY_HW_RTC_USER_MEM_MAX > 0
     { MP_ROM_QSTR(MP_QSTR_MEM_SIZE), MP_ROM_INT(MICROPY_HW_RTC_USER_MEM_MAX) },
     { MP_ROM_QSTR(MP_QSTR_memory), MP_ROM_PTR(&machine_rtc_memory_obj) },
+    { MP_ROM_QSTR(MP_QSTR_mem_start), MP_ROM_PTR(&machine_rtc_mem_start_obj) },
     #endif
 };
 STATIC MP_DEFINE_CONST_DICT(machine_rtc_locals_dict, machine_rtc_locals_dict_table);

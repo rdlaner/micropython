@@ -31,16 +31,15 @@
 
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
 
-#if CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32 && CONFIG_ULP_COPROC_TYPE_FSM
 #include "esp32/ulp.h"
-#elif CONFIG_IDF_TARGET_ESP32S2
+#elif CONFIG_IDF_TARGET_ESP32S2 && CONFIG_ULP_COPROC_TYPE_FSM
 #include "esp32s2/ulp.h"
-#include "esp32s2/ulp_riscv.h"
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif CONFIG_IDF_TARGET_ESP32S3 && CONFIG_ULP_COPROC_TYPE_FSM
 #include "esp32s3/ulp.h"
-#include "esp32s3/ulp_riscv.h"
 #endif
 
+#include "ulp_riscv.h"
 #include "esp_err.h"
 
 typedef struct _esp32_ulp_obj_t {
@@ -71,6 +70,7 @@ STATIC mp_obj_t esp32_ulp_set_wakeup_period(mp_obj_t self_in, mp_obj_t period_in
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(esp32_ulp_set_wakeup_period_obj, esp32_ulp_set_wakeup_period);
 
+#if CONFIG_ULP_COPROC_TYPE_FSM
 STATIC mp_obj_t esp32_ulp_load_binary(mp_obj_t self_in, mp_obj_t load_addr_in, mp_obj_t program_binary_in) {
     mp_uint_t load_addr = mp_obj_get_int(load_addr_in);
 
@@ -85,35 +85,6 @@ STATIC mp_obj_t esp32_ulp_load_binary(mp_obj_t self_in, mp_obj_t load_addr_in, m
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(esp32_ulp_load_binary_obj, esp32_ulp_load_binary);
 
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-
-    #if CONFIG_ESP32S3_ULP_COPROC_RISCV
-
-    extern const uint8_t bin_start[] asm("_binary_ulp_main_bin_start");
-    extern const uint8_t bin_end[]   asm("_binary_ulp_main_bin_end");
-
-    STATIC mp_obj_t esp32_ulp_riscv_load_binary(mp_obj_t self_in) {
-
-        int _errno = ulp_riscv_load_binary(bin_start, (bin_end - bin_start));
-        if (_errno != ESP_OK) {
-            mp_raise_OSError(_errno);
-        }
-        return mp_const_none;
-    }
-    STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_load_binary_obj, esp32_ulp_riscv_load_binary);
-
-    STATIC mp_obj_t esp32_ulp_riscv_run(mp_obj_t self_in) {
-
-        int _errno = ulp_riscv_run();
-        if (_errno != ESP_OK) {
-            mp_raise_OSError(_errno);
-        }
-        return mp_const_none;
-    }
-    STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_run_obj, esp32_ulp_riscv_run);
-    #endif
-#endif
-
 STATIC mp_obj_t esp32_ulp_run(mp_obj_t self_in, mp_obj_t entry_point_in) {
     mp_uint_t entry_point = mp_obj_get_int(entry_point_in);
     int _errno = ulp_run(entry_point / sizeof(uint32_t));
@@ -123,32 +94,75 @@ STATIC mp_obj_t esp32_ulp_run(mp_obj_t self_in, mp_obj_t entry_point_in) {
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(esp32_ulp_run_obj, esp32_ulp_run);
+#endif
 
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-    #if CONFIG_ESP32S3_ULP_COPROC_RISCV
-        #include "genhdr/esp32_ulpconst_qstr.h"
-    #endif
+#if CONFIG_ULP_COPROC_TYPE_RISCV
+extern const uint8_t bin_start[] asm("_binary_ulp_main_bin_start");
+extern const uint8_t bin_end[]   asm("_binary_ulp_main_bin_end");
+ulp_riscv_cfg_t ulp_cfg = {
+    .wakeup_source = ULP_RISCV_WAKEUP_SOURCE_TIMER
+};
+
+STATIC mp_obj_t esp32_ulp_riscv_load_binary(mp_obj_t self_in) {
+    int _errno = ulp_riscv_load_binary(bin_start, (bin_end - bin_start));
+    if (_errno != ESP_OK) {
+        mp_raise_OSError(_errno);
+    }
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_load_binary_obj, esp32_ulp_riscv_load_binary);
+
+STATIC mp_obj_t esp32_ulp_riscv_run(mp_obj_t self_in) {
+    int _errno = ulp_riscv_config_and_run(&ulp_cfg);
+    if (_errno != ESP_OK) {
+        mp_raise_OSError(_errno);
+    }
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_run_obj, esp32_ulp_riscv_run);
+
+STATIC mp_obj_t esp32_ulp_riscv_halt(mp_obj_t self_in) {
+    ulp_riscv_timer_stop();
+    ulp_riscv_halt();
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_halt_obj, esp32_ulp_riscv_halt);
+
+STATIC mp_obj_t esp32_ulp_riscv_set_wakeup_src_gpio(mp_obj_t self_in) {
+    ulp_cfg.wakeup_source = ULP_RISCV_WAKEUP_SOURCE_GPIO;
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_set_wakeup_src_gpio_obj, esp32_ulp_riscv_set_wakeup_src_gpio);
+
+STATIC mp_obj_t esp32_ulp_riscv_set_wakeup_src_timer(mp_obj_t self_in) {
+    ulp_cfg.wakeup_source = ULP_RISCV_WAKEUP_SOURCE_TIMER;
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_ulp_riscv_set_wakeup_src_timer_obj, esp32_ulp_riscv_set_wakeup_src_timer);
+#endif
+
+#if CONFIG_ULP_COPROC_TYPE_RISCV
+#include "genhdr/esp32_ulpconst_qstr.h"
 #endif
 
 STATIC const mp_rom_map_elem_t esp32_ulp_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_wakeup_period), MP_ROM_PTR(&esp32_ulp_set_wakeup_period_obj) },
+    { MP_ROM_QSTR(MP_QSTR_RESERVE_MEM), MP_ROM_INT(CONFIG_ULP_COPROC_RESERVE_MEM) },
+
+    #if CONFIG_ULP_COPROC_TYPE_FSM
     { MP_ROM_QSTR(MP_QSTR_load_binary), MP_ROM_PTR(&esp32_ulp_load_binary_obj) },
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&esp32_ulp_run_obj) },
-    #if CONFIG_IDF_TARGET_ESP32
-    { MP_ROM_QSTR(MP_QSTR_RESERVE_MEM), MP_ROM_INT(CONFIG_ESP32_ULP_COPROC_RESERVE_MEM) },
-    #elif CONFIG_IDF_TARGET_ESP32S2
-    { MP_ROM_QSTR(MP_QSTR_RESERVE_MEM), MP_ROM_INT(CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM) },
-    #elif CONFIG_IDF_TARGET_ESP32S3
-    { MP_ROM_QSTR(MP_QSTR_RESERVE_MEM), MP_ROM_INT(CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM) },
-    #endif
-    #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-        #if CONFIG_ESP32S3_ULP_COPROC_RISCV
-        { MP_ROM_QSTR(MP_QSTR_riscv_load_binary), MP_ROM_PTR(&esp32_ulp_riscv_load_binary_obj) },
-        { MP_ROM_QSTR(MP_QSTR_riscv_run), MP_ROM_PTR(&esp32_ulp_riscv_run_obj) },
-        #include "genhdr/esp32_ulpconst_mpz.h"
-        #endif
     #endif
 
+    #if CONFIG_ULP_COPROC_TYPE_RISCV
+    { MP_ROM_QSTR(MP_QSTR_riscv_load_binary), MP_ROM_PTR(&esp32_ulp_riscv_load_binary_obj) },
+    { MP_ROM_QSTR(MP_QSTR_riscv_run), MP_ROM_PTR(&esp32_ulp_riscv_run_obj) },
+    { MP_ROM_QSTR(MP_QSTR_riscv_halt), MP_ROM_PTR(&esp32_ulp_riscv_halt_obj) },
+    { MP_ROM_QSTR(MP_QSTR_riscv_set_wakeup_src_gpio), MP_ROM_PTR(&esp32_ulp_riscv_set_wakeup_src_gpio_obj) },
+    { MP_ROM_QSTR(MP_QSTR_riscv_set_wakeup_src_timer), MP_ROM_PTR(&esp32_ulp_riscv_set_wakeup_src_timer_obj) },
+    #include "genhdr/esp32_ulpconst_mpz.h"
+    #endif
 };
 STATIC MP_DEFINE_CONST_DICT(esp32_ulp_locals_dict, esp32_ulp_locals_dict_table);
 

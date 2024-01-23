@@ -229,24 +229,22 @@ add_custom_command(
 )
 
 # Include riscv ulp code if exists in ulp_riscv sub directory
-if(EXISTS ${PROJECT_DIR}/ulp_riscv/main.c)
-    set(ulp_app_name ulp_${COMPONENT_NAME})
-    set(ulp_sources "${PROJECT_DIR}/ulp_riscv/main.c")
-    set(ulp_exp_dep_srcs "${PROJECT_DIR}/main.c")
+if(EXISTS ${MICROPY_PORT_DIR}/ulp_riscv/main.c)
+    set(ulp_app_name ulp_main)
+    set(ulp_sources "${MICROPY_PORT_DIR}/ulp_riscv/main.c")
+    set(ulp_exp_dep_srcs "${MICROPY_PORT_DIR}/main.c")
 
     ulp_embed_binary(${ulp_app_name} "${ulp_sources}" "${ulp_exp_dep_srcs}")
-endif()
 
-# Generate ULP variable constants
-if(EXISTS ${PROJECT_DIR}/ulp_riscv/main.c)
+    # Generate ULP variable constants
     add_custom_command(
-      OUTPUT ${PROJECT_DIR}/build/esp32_ulpconst_qstr.h
-      COMMAND python ${PROJECT_DIR}/make-esp32ulpconst.py ../../esp-idf/main/ulp_main/ulp_main.ld
-      DEPENDS ${PROJECT_DIR}/build/esp-idf/main/ulp_main/ulp_main.ld
+      OUTPUT ${CMAKE_BINARY_DIR}/esp32_ulpconst_qstr.h
+      COMMAND python ${MICROPY_PORT_DIR}/make-esp32ulpconst.py ../../esp-idf/${COMPONENT_NAME}/${ulp_app_name}/${ulp_app_name}.ld
+      DEPENDS ${CMAKE_BINARY_DIR}/esp-idf/${COMPONENT_NAME}/${ulp_app_name}/${ulp_app_name}.ld
       COMMENT "Parsing ULP headers"
       VERBATIM
-      )
+    )
 
-    add_library(ULP_CONST INTERFACE ${PROJECT_DIR}/build/esp32_ulpconst_qstr.h)
+    add_library(ULP_CONST INTERFACE ${CMAKE_BINARY_DIR}/esp32_ulpconst_qstr.h)
 
 endif()
