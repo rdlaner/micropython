@@ -12,32 +12,37 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "esp32s3/ulp_riscv.h"
-#include "ulp_riscv/ulp_riscv_utils.h"
-#include "ulp_riscv/ulp_riscv_gpio.h"
+#include "ulp_riscv.h"
+#include "ulp_riscv_utils.h"
+#include "ulp_riscv_gpio.h"
 
 /* this variable will be exported as a public symbol, visible from main CPU: */
-bool gpio_level = false;
+// bool gpio_level = true;
 
 int main (void)
 {
-   ulp_riscv_gpio_init(14);
-   ulp_riscv_gpio_set_output_mode(14, RTCIO_MODE_OUTPUT);
-   ulp_riscv_gpio_output_enable(14);
+   // Wake AP
+   ulp_riscv_wakeup_main_processor();
 
-   while(1) {
-        // Turn on GPIO
-        ulp_riscv_gpio_output_level(14, 1);
-        gpio_level = true;
-        // Delay
-        ulp_riscv_delay_cycles(1000 * 1000);
-        // Turn off GPIO
-        ulp_riscv_gpio_output_level(14, 0);
-        gpio_level = false;
-        // Delay
-        ulp_riscv_delay_cycles(1000 * 1000);
-   }
+   // Init gpio pins
+   ulp_riscv_gpio_init(7);
+   ulp_riscv_gpio_input_enable(7);
+   ulp_riscv_gpio_init(13);
+   ulp_riscv_gpio_set_output_mode(13, RTCIO_MODE_OUTPUT);
+   ulp_riscv_gpio_output_enable(13);
 
-    /* ulp_riscv_halt() is called automatically when main exits */
-    return 0;
+   // Poor man's debounce to prevent waking up the ULP multiple times
+   ulp_riscv_delay_cycles(50 * ULP_RISCV_CYCLES_PER_MS);
+   while (ulp_riscv_gpio_get_level(7) == 0);
+   ulp_riscv_delay_cycles(50 * ULP_RISCV_CYCLES_PER_MS);
+   while (ulp_riscv_gpio_get_level(7) == 0);
+
+   // Clear
+   ulp_riscv_gpio_wakeup_clear();
+
+   // Turn on GPIO
+   ulp_riscv_gpio_output_level(13, 1);
+
+   // NOTE: ulp_riscv_halt() is called automatically when main exits
+   return 0;
 }
