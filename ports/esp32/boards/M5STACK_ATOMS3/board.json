@@ -1,0 +1,22 @@
+{
+    "deploy": [
+        "deploy.md"
+    ],
+    "docs": "https://docs.m5stack.com/en/core/AtomS3",
+    "features": [
+        "BLE",
+        "Battery Charging",
+        "Display",
+        "External Flash",
+        "External RAM",
+        "IMU",
+        "USB-C",
+        "WiFi"
+    ],
+    "images": [],
+    "mcu": "esp32s3",
+    "product": "AtomS3",
+    "thumbnail": "",
+    "url": "https://shop.m5stack.com/products/atoms3-dev-kit-w-0-85-inch-screen",
+    "vendor": "M5 Stack"
+}
