@@ -10,7 +10,7 @@ except NameError:
 # MPy and CPy differ for this case
 #try:
 #    compile("", "stdin", "single")
-#except SyntaxError:
+# except SyntaxError:
 #    print("SyntaxError")
 try:
     compile("", "stdin", "eval")

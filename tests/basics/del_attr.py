@@ -2,6 +2,7 @@ class C:
     def f():
         pass
 
+
 # del a class attribute
 
 del C.f

@@ -13,6 +13,7 @@ except: # NameError:
     # FIXME MicroPython returns KeyError for this
     print("NameError")
 
+
 class C:
     def f():
         pass

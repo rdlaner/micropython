@@ -14,8 +14,10 @@ a.seek(0)
 for line in a:
     print(line)
 
+
 class X(io.StringIO):
     pass
+
 
 b = X()
 b.write("hello\nworld\nmicro\npython\n")

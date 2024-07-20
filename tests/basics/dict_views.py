@@ -4,7 +4,7 @@ for m in d.items, d.values, d.keys:
     print(list(m()))
 
 # print a view with more than one item
-print({1:1, 2:1}.values())
+print({1: 1, 2: 1}.values())
 
 # `bool` and `len` unary ops
 for d in ({}, {1: 2}, {1: 2, 3: 4}):
@@ -13,22 +13,22 @@ for d in ({}, {1: 2}, {1: 2, 3: 4}):
 
 # unsupported binary op on a dict values view
 try:
-    {1:1}.values() + 1
+    {1: 1}.values() + 1
 except TypeError:
-    print('TypeError')
+    print("TypeError")
 
 # unsupported binary op on a dict keys view
 try:
-    {1:1}.keys() + 1
+    {1: 1}.keys() + 1
 except TypeError:
-    print('TypeError')
+    print("TypeError")
 
 # keys dict_view is not hashable
 
 try:
     hash({}.keys())
 except TypeError:
-    print('TypeError')
+    print("TypeError")
 
 # values dict_view is hashable
 
@@ -39,6 +39,6 @@ print(type(hash({}.values())))
 try:
     hash({}.items())
 except TypeError:
-    print('TypeError')
+    print("TypeError")
 
 # set operations still to come

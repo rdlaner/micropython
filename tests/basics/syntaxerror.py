@@ -6,6 +6,7 @@ except NameError:
     print("SKIP")
     raise SystemExit
 
+
 def test_syntax(code):
     try:
         exec(code)
@@ -14,6 +15,7 @@ def test_syntax(code):
         print("IndentationError")
     except SyntaxError:
         print("SyntaxError")
+
 
 # non-newline after line-continuation character (lexer error)
 test_syntax("a \\a\n")
@@ -36,8 +38,8 @@ test_syntax(" a\n")
 test_syntax("123z")
 
 # input doesn't match the grammar (parser error)
-test_syntax('1 or 2 or')
-test_syntax('{1:')
+test_syntax("1 or 2 or")
+test_syntax("{1:")
 
 # can't assign to literals
 test_syntax("1 = 2")
@@ -115,18 +117,18 @@ test_syntax("def f(a, a): pass")
 test_syntax("def f():\n def g():\n  nonlocal a")
 
 # param can't be redefined as global
-test_syntax('def f(x):\n global x')
+test_syntax("def f(x):\n global x")
 
 # param can't be redefined as nonlocal
-test_syntax('def f(x):\n nonlocal x')
+test_syntax("def f(x):\n nonlocal x")
 
 # can define variable to be both nonlocal and global
-test_syntax('def f():\n nonlocal x\n global x')
+test_syntax("def f():\n nonlocal x\n global x")
 
 # can't have multiple *'s
-test_syntax('def f(x, *a, *):\n pass')
-test_syntax('lambda x, *a, *: 1')
+test_syntax("def f(x, *a, *):\n pass")
+test_syntax("lambda x, *a, *: 1")
 
 # **kw must be last
-test_syntax('def f(x, *a, **kw, r):\n pass')
-test_syntax('lambda x, *a, **kw, r: 1')
+test_syntax("def f(x, *a, **kw, r):\n pass")
+test_syntax("lambda x, *a, **kw, r: 1")

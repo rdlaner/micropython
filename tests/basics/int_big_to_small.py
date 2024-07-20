@@ -1,5 +1,6 @@
 try:
     import micropython
+
     micropython.heap_lock
 except:
     print("SKIP")
@@ -17,10 +18,10 @@ finally:
     micropython.heap_unlock()
 
 # All less than small int max.
-for d in (0, 27, 1<<29, -1861, -(1<<29)):
-    i = 1<<70
+for d in (0, 27, 1 << 29, -1861, -(1 << 29)):
+    i = 1 << 70
     print(i)
-    j = (1<<70) + d
+    j = (1 << 70) + d
     print(j)
     # k should now be a small int.
     k = j - i

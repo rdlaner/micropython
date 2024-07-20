@@ -1,8 +1,10 @@
 # del global
 
+
 def do_del():
     global x
     del x
+
 
 x = 1
 print(x)
