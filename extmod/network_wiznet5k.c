@@ -114,7 +114,7 @@ typedef struct _wiznet5k_obj_t {
 } wiznet5k_obj_t;
 
 #if WIZNET5K_WITH_LWIP_STACK
-#define IS_ACTIVE(self) (self->netif.flags & NETIF_FLAG_UP)
+#define IS_ACTIVE(self) (self->netif.flags &NETIF_FLAG_UP)
 #else // WIZNET5K_PROVIDED_STACK
 #define IS_ACTIVE(self) (self->active)
 #endif

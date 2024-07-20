@@ -44,7 +44,7 @@
 #define NACK_RECVD        (i2c->I2CM.STATUS.bit.RXNACK == 1)
 #define IRQ_DATA_SENT     (i2c->I2CM.INTFLAG.bit.MB == 1)
 #define IRQ_DATA_RECVD    (i2c->I2CM.INTFLAG.bit.SB == 1)
-#define READ_MODE         ((flags & MP_MACHINE_I2C_FLAG_READ) != 0)
+#define READ_MODE         ((flags &MP_MACHINE_I2C_FLAG_READ) != 0)
 
 #define PREPARE_ACK       i2c->I2CM.CTRLB.bit.ACKACT = 0
 #define PREPARE_NACK      i2c->I2CM.CTRLB.bit.ACKACT = 1

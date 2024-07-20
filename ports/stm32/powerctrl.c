@@ -52,8 +52,8 @@
 #define POWERCTRL_GET_VOLTAGE_SCALING() LL_PWR_GetRegulVoltageScaling()
 #else
 #define POWERCTRL_GET_VOLTAGE_SCALING()     \
-    (((PWR->CSR1 & PWR_CSR1_ACTVOS) && (SYSCFG->PWRCR & SYSCFG_PWRCR_ODEN)) ? \
-    PWR_REGULATOR_VOLTAGE_SCALE0 : (PWR->CSR1 & PWR_CSR1_ACTVOS))
+        (((PWR->CSR1 &PWR_CSR1_ACTVOS) && (SYSCFG->PWRCR &SYSCFG_PWRCR_ODEN)) ? \
+    PWR_REGULATOR_VOLTAGE_SCALE0 : (PWR->CSR1 &PWR_CSR1_ACTVOS))
 #endif
 #else
 #define RCC_SR          CSR
@@ -88,7 +88,7 @@
 #define BL_STATE_INVALID            (0)
 #define BL_STATE_VALID(reg, addr)   ((uint64_t)(reg) | ((uint64_t)((addr) | BL_STATE_KEY)) << BL_STATE_KEY_SHIFT)
 #define BL_STATE_GET_REG(s)         ((s) & 0xffffffff)
-#define BL_STATE_GET_KEY(s)         (((s) >> BL_STATE_KEY_SHIFT) & BL_STATE_KEY_MASK)
+#define BL_STATE_GET_KEY(s)         (((s) >> BL_STATE_KEY_SHIFT)&BL_STATE_KEY_MASK)
 #define BL_STATE_GET_ADDR(s)        (((s) >> BL_STATE_KEY_SHIFT) & ~BL_STATE_KEY_MASK)
 extern uint64_t _bl_state[];
 #endif

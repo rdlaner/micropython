@@ -68,13 +68,13 @@ static uint32_t fallback_popcount(uint32_t value) {
 #define AVAILABLE_REGISTERS_COUNT 32
 
 #define IS_IN_C_REGISTER_WINDOW(register_number) \
-    (((register_number) >= ASM_RV32_REG_X8) && ((register_number) <= ASM_RV32_REG_X15))
+        (((register_number) >= ASM_RV32_REG_X8) && ((register_number) <= ASM_RV32_REG_X15))
 #define MAP_IN_C_REGISTER_WINDOW(register_number) \
-    ((register_number) - ASM_RV32_REG_X8)
+        ((register_number) - ASM_RV32_REG_X8)
 
 #define FIT_UNSIGNED(value, bits) (((value) & ~((1U << (bits)) - 1)) == 0)
 #define FIT_SIGNED(value, bits) \
-    ((((value) & ~((1U << ((bits) - 1)) - 1)) == 0) ||                                      \
+        ((((value) & ~((1U << ((bits) - 1)) - 1)) == 0) ||                                      \
     (((value) & ~((1U << ((bits) - 1)) - 1)) == ~((1U << ((bits) - 1)) - 1)))
 
 ///////////////////////////////////////////////////////////////////////////////

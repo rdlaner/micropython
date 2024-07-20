@@ -123,59 +123,59 @@ void asm_rv32_end_pass(asm_rv32_t *state);
 ////////////////////////////////////////////////////////////////////////////////
 
 #define RV32_ENCODE_TYPE_B(op, ft3, rs1, rs2, imm) \
-    ((op & 0x7F) | ((ft3 & 0x07) << 12) | ((imm & 0x800) >> 4) | \
+        ((op & 0x7F) | ((ft3 & 0x07) << 12) | ((imm & 0x800) >> 4) | \
     ((imm & 0x1E) << 7) | ((rs1 & 0x1F) << 15) | ((rs2 & 0x1F) << 20) | \
     ((imm & 0x7E0) << 20) | ((imm & 0x1000) << 19))
 
 #define RV32_ENCODE_TYPE_I(op, ft3, rd, rs, imm) \
-    ((op & 0x7F) | ((rd & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
+        ((op & 0x7F) | ((rd & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
     ((rs & 0x1F) << 15) | ((imm & 0xFFF) << 20))
 
 #define RV32_ENCODE_TYPE_J(op, rd, imm) \
-    ((op & 0x7F) | ((rd & 0x1F) << 7) | (imm & 0xFF000) | \
+        ((op & 0x7F) | ((rd & 0x1F) << 7) | (imm & 0xFF000) | \
     ((imm & 0x800) << 9) | ((imm & 0x7FE) << 20) | ((imm & 0x100000) << 11))
 
 #define RV32_ENCODE_TYPE_R(op, ft3, ft7, rd, rs1, rs2) \
-    ((op & 0x7F) | ((rd & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
+        ((op & 0x7F) | ((rd & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
     ((rs1 & 0x1F) << 15) | ((rs2 & 0x1F) << 20) | ((ft7 & 0x7F) << 25))
 
 #define RV32_ENCODE_TYPE_S(op, ft3, rs1, rs2, imm) \
-    ((op & 0x7F) | ((imm & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
+        ((op & 0x7F) | ((imm & 0x1F) << 7) | ((ft3 & 0x07) << 12) | \
     ((rs1 & 0x1F) << 15) | ((rs2 & 0x1F) << 20) | ((imm & 0xFE0) << 20))
 
 #define RV32_ENCODE_TYPE_U(op, rd, imm) \
-    ((op & 0x7F) | ((rd & 0x1F) << 7) | (imm & 0xFFFFF000))
+        ((op & 0x7F) | ((rd & 0x1F) << 7) | (imm & 0xFFFFF000))
 
 #define RV32_ENCODE_TYPE_CB(op, ft3, rs, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rs & 0x07) << 7) | \
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rs & 0x07) << 7) | \
     (((imm) & 0x100) << 4) | (((imm) & 0xC0) >> 1) | (((imm) & 0x20) >> 3) | \
     (((imm) & 0x18) << 7) | (((imm) & 0x06) << 2))
 
 #define RV32_ENCODE_TYPE_CI(op, ft3, rd, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x1F) << 7) | \
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x1F) << 7) | \
     (((imm) & 0x20) << 7) | (((imm) & 0x1F) << 2))
 
 #define RV32_ENCODE_TYPE_CIW(op, ft3, rd, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x07) << 2) | \
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x07) << 2) | \
     ((imm & 0x3C0) << 1) | ((imm & 0x30) << 7) | \
     ((imm & 0x08) << 2) | ((imm & 0x04) << 4))
 
 #define RV32_ENCODE_TYPE_CJ(op, ft3, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((imm & 0x0E) << 2) | \
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((imm & 0x0E) << 2) | \
     ((imm & 0x300) << 1) | ((imm & 0x800) << 1) | ((imm & 0x400) >> 2) | \
     ((imm & 0x80) >> 1) | ((imm & 0x40) << 1) | ((imm & 0x20) >> 3) | \
     ((imm & 0x10) << 7))
 
 #define RV32_ENCODE_TYPE_CL(op, ft3, rd, rs, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x07) << 2) | \
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rd & 0x07) << 2) | \
     ((rs & 0x07) << 7) | ((imm & 0x40) >> 1) | ((imm & 0x38) << 7) | \
     ((imm & 0x04) << 4))
 
 #define RV32_ENCODE_TYPE_CR(op, ft4, rs1, rs2) \
-    ((op & 0x03) | ((rs2 & 0x1F) << 2) | ((rs1 & 0x1F) << 7) | ((ft4 & 0x0F) << 12))
+        ((op & 0x03) | ((rs2 & 0x1F) << 2) | ((rs1 & 0x1F) << 7) | ((ft4 & 0x0F) << 12))
 
 #define RV32_ENCODE_TYPE_CSS(op, ft3, rs, imm) \
-    ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rs & 0x1F) << 2) | ((imm) & 0x3F) << 7)
+        ((op & 0x03) | ((ft3 & 0x07) << 13) | ((rs & 0x1F) << 2) | ((imm) & 0x3F) << 7)
 
 void asm_rv32_emit_word_opcode(asm_rv32_t *state, mp_uint_t opcode);
 void asm_rv32_emit_halfword_opcode(asm_rv32_t *state, mp_uint_t opcode);

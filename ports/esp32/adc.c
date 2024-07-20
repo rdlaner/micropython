@@ -33,7 +33,7 @@
 
 void madcblock_bits_helper(machine_adc_block_obj_t *self, mp_int_t bits) {
     switch (bits) {
-        #if CONFIG_IDF_TARGET_ESP32
+    #if CONFIG_IDF_TARGET_ESP32
         case 9:
             self->width = ADC_WIDTH_BIT_9;
             break;
@@ -43,17 +43,17 @@ void madcblock_bits_helper(machine_adc_block_obj_t *self, mp_int_t bits) {
         case 11:
             self->width = ADC_WIDTH_BIT_11;
             break;
-        #endif
-        #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
+    #endif
+    #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
         case 12:
             self->width = ADC_WIDTH_BIT_12;
             break;
-        #endif
-        #if CONFIG_IDF_TARGET_ESP32S2
+    #endif
+    #if CONFIG_IDF_TARGET_ESP32S2
         case 13:
             self->width = ADC_WIDTH_BIT_13;
             break;
-        #endif
+    #endif
         default:
             mp_raise_ValueError(MP_ERROR_TEXT("invalid bits"));
     }

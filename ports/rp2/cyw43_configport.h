@@ -52,14 +52,14 @@
 #define CYW43_HOST_NAME                 mod_network_hostname_data
 
 #define CYW43_SDPCM_SEND_COMMON_WAIT \
-    if (get_core_num() == 0) { \
-        cyw43_yield(); \
-    } \
+        if (get_core_num() == 0) { \
+            cyw43_yield(); \
+        } \
 
 #define CYW43_DO_IOCTL_WAIT \
-    if (get_core_num() == 0) { \
-        cyw43_yield(); \
-    } \
+        if (get_core_num() == 0) { \
+            cyw43_yield(); \
+        } \
 
 #define CYW43_ARRAY_SIZE(a)             MP_ARRAY_SIZE(a)
 

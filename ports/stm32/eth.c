@@ -279,10 +279,10 @@ static int eth_mac_init(eth_t *self) {
     // Do a soft reset of the MAC core
     #if defined(STM32H5) || defined(STM32H7)
     #define ETH_SOFT_RESET(eth) do { eth->DMAMR = ETH_DMAMR_SWR; } while (0)
-    #define ETH_IS_RESET(eth) (eth->DMAMR & ETH_DMAMR_SWR)
+    #define ETH_IS_RESET(eth) (eth->DMAMR &ETH_DMAMR_SWR)
     #else
     #define ETH_SOFT_RESET(eth) do { eth->DMABMR = ETH_DMABMR_SR; } while (0)
-    #define ETH_IS_RESET(eth) (eth->DMABMR & ETH_DMABMR_SR)
+    #define ETH_IS_RESET(eth) (eth->DMABMR &ETH_DMABMR_SR)
     #endif
 
     ETH_SOFT_RESET(ETH);

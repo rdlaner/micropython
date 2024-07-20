@@ -47,10 +47,10 @@
 #define GPIO_IRQ_ALL (0xf)
 
 // Macros to access the state of the hardware.
-#define GPIO_GET_FUNCSEL(id) ((iobank0_hw->io[(id)].ctrl & IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS) >> IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB)
+#define GPIO_GET_FUNCSEL(id) ((iobank0_hw->io[(id)].ctrl &IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS) >> IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB)
 #define GPIO_IS_OUT(id) (sio_hw->gpio_oe & (1 << (id)))
-#define GPIO_IS_PULL_UP(id) (padsbank0_hw->io[(id)] & PADS_BANK0_GPIO0_PUE_BITS)
-#define GPIO_IS_PULL_DOWN(id) (padsbank0_hw->io[(id)] & PADS_BANK0_GPIO0_PDE_BITS)
+#define GPIO_IS_PULL_UP(id) (padsbank0_hw->io[(id)] &PADS_BANK0_GPIO0_PUE_BITS)
+#define GPIO_IS_PULL_DOWN(id) (padsbank0_hw->io[(id)] &PADS_BANK0_GPIO0_PDE_BITS)
 
 // Open drain behaviour is simulated.
 #define GPIO_IS_OPEN_DRAIN(id) (machine_pin_open_drain_mask & (1 << (id)))
