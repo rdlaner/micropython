@@ -32,8 +32,10 @@
 #include <sys/time.h>
 #include "driver/gpio.h"
 
+#include "py/binary.h"
 #include "py/nlr.h"
 #include "py/obj.h"
+#include "py/objint.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "extmod/modmachine.h"
@@ -143,6 +145,78 @@ static mp_obj_t machine_rtc_datetime(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_datetime_obj, 1, 2, machine_rtc_datetime);
 
+static mp_obj_t machine_rtc_now(mp_obj_t self_in) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    uint64_t timestamp = ((uint64_t)tv.tv_sec * 1000000ULL) + (uint64_t)tv.tv_usec;
+
+    return mp_obj_new_int_from_ull(timestamp);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_rtc_now_obj, machine_rtc_now);
+
+static mp_obj_t machine_rtc_offset(mp_obj_t self_in, mp_obj_t offset_obj) {
+    // Extract 64-bit offset value (in microseconds)
+    int64_t offset_us = 0;
+    if (mp_obj_is_small_int(offset_obj)) {
+        offset_us = MP_OBJ_SMALL_INT_VALUE(offset_obj);
+    } else {
+        uint8_t buf[sizeof(int64_t)];
+        if (mp_obj_int_to_bytes_impl(offset_obj, true, sizeof(buf), buf)) {
+            offset_us = mp_binary_get_int(sizeof(buf), true, true, buf);
+        }
+    }
+
+    // Handle signed-ness
+    bool is_signed = false;
+    if (offset_us < 0) {
+        is_signed = true;
+        offset_us *= -1;
+    }
+
+    // Construct offset time value
+    struct timeval offset_tv;
+    offset_tv.tv_sec = offset_us / 1000000;   // Convert microseconds to seconds
+    offset_tv.tv_usec = offset_us % 1000000;  // Remaining microseconds
+
+    // Get current time
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    // Apply offset
+    if (is_signed) {
+        tv.tv_sec += offset_tv.tv_sec;
+        tv.tv_usec += offset_tv.tv_usec;
+
+        // Handle overflow
+        while (tv.tv_usec >= 1000000) {
+            tv.tv_sec += 1;
+            tv.tv_usec -= 1000000;
+        }
+
+    } else {
+        tv.tv_sec -= offset_tv.tv_sec;
+        tv.tv_usec -= offset_tv.tv_usec;
+
+        // Handle overflow
+        while (tv.tv_usec < 0) {
+            tv.tv_sec -= 1;
+            tv.tv_usec += 1000000;
+
+            if (tv.tv_sec < 0) {
+                tv.tv_sec = 0;
+                tv.tv_usec = 0;
+                break;
+            }
+        }
+    }
+
+    // Set adjusted time
+    settimeofday(&tv, NULL);
+
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_2(machine_rtc_offset_obj, machine_rtc_offset);
+
 static mp_obj_t machine_rtc_init(mp_obj_t self_in, mp_obj_t date) {
     mp_obj_t args[2] = {self_in, date};
     machine_rtc_datetime_helper(2, args);
@@ -213,6 +287,8 @@ static mp_obj_t machine_rtc_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t va
 static const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_rtc_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_datetime), MP_ROM_PTR(&machine_rtc_datetime_obj) },
+    { MP_ROM_QSTR(MP_QSTR_now), MP_ROM_PTR(&machine_rtc_now_obj) },
+    { MP_ROM_QSTR(MP_QSTR_offset), MP_ROM_PTR(&machine_rtc_offset_obj) },
     #if MICROPY_HW_RTC_USER_MEM_MAX > 0
     { MP_ROM_QSTR(MP_QSTR_MEM_SIZE), MP_ROM_INT(MICROPY_HW_RTC_USER_MEM_MAX) },
     { MP_ROM_QSTR(MP_QSTR_memory), MP_ROM_PTR(&machine_rtc_memory_obj) },
