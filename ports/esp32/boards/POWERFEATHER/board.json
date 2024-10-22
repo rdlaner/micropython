@@ -1,0 +1,24 @@
+{
+    "deploy": [
+        "deploy.md"
+    ],
+    "docs": "",
+    "features": [
+        "BLE",
+        "Battery Charging",
+        "External Flash",
+        "External RAM",
+        "Feather",
+        "JST-SH",
+        "LoRa",
+        "USB-C",
+        "WiFi"
+    ],
+    "features_non_filterable": [],
+    "images": [],
+    "mcu": "esp32s3",
+    "product": "PowerFeather ESP32S3",
+    "thumbnail": "",
+    "url": "https://www.powerfeather.dev",
+    "vendor": "PowerFeather"
+}
