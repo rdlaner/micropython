@@ -167,16 +167,8 @@ static mp_obj_t machine_rtc_now(mp_obj_t self_in) {
 static MP_DEFINE_CONST_FUN_OBJ_1(machine_rtc_now_obj, machine_rtc_now);
 
 static mp_obj_t machine_rtc_offset(mp_obj_t self_in, mp_obj_t offset_obj) {
-    // Extract 64-bit offset value (in microseconds)
-    int64_t offset_us = 0;
-    if (mp_obj_is_small_int(offset_obj)) {
-        offset_us = MP_OBJ_SMALL_INT_VALUE(offset_obj);
-    } else {
-        uint8_t buf[sizeof(int64_t)];
-        if (mp_obj_int_to_bytes_impl(offset_obj, true, sizeof(buf), buf)) {
-            offset_us = mp_binary_get_int(sizeof(buf), true, true, buf);
-        }
-    }
+    // Read signed 64-bit offset value (in microseconds)
+    long long offset_us = mp_obj_get_ll(offset_obj);
 
     // Handle signed-ness
     bool is_signed = false;
